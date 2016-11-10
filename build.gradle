@@ -18,6 +18,10 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }
 
+jar {
+    from "LICENSE.txt"
+}
+
 processResources
 {
     // this will ensure that this task is redone when the versions change.
