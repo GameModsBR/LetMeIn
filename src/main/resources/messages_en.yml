@@ -21,6 +21,10 @@ kicked: |
 welcome: |
   &bWelcome {name}&f, &c{bad}&f players have joined before you, become a donor too and you'll join quicker when the server is full.
 
+server-list: |
+  &eHello {name}, &2Your position is &l{pos}
+  &cPlease reconnect hold your position.
+
 #############################################################
 ###  Messages displayed to players with custom message.   ###
 #############################################################

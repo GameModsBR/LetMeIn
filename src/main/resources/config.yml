@@ -44,3 +44,10 @@ get-player-by: uuid
 # When this is true, the welcome message will be sent only if the the player's connection were queued
 # or if somebody got kicked for him
 welcome-only-when-queued: true
+
+# When this support is enabled, the max players in the server list will show 1 extra fake slot to force the
+# auto-join mod to attempt to join, keeping the queue position.
+auto-join-support: true
+
+# Should we show the player's position when the player updates the server list?
+enable-server-list: true

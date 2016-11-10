@@ -16,6 +16,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -41,6 +42,8 @@ public class LetMeInPlugin extends JavaPlugin implements Listener
     private int allow;
     private boolean uuidMethod;
     private boolean welcomeOnlyWhenQueued;
+    private boolean autoJoinSupport;
+    private boolean serverListEnabled;
     private int timeout;
     private ScheduledFuture<?> cleanupTask;
 
@@ -99,6 +102,8 @@ public class LetMeInPlugin extends JavaPlugin implements Listener
         uuidMethod = getConfig().getString("get-player-by", "uuid").equalsIgnoreCase("uuid");
         timeout = Math.max(1, getConfig().getInt("timeout", 30));
         welcomeOnlyWhenQueued = getConfig().getBoolean("welcome-only-when-queued", true);
+        autoJoinSupport = getConfig().getBoolean("auto-join-support", true);
+        serverListEnabled = getConfig().getBoolean("server-list", true);
 
         if(cleanupTask != null)
             cleanupTask.cancel(true);
@@ -249,6 +254,7 @@ public class LetMeInPlugin extends JavaPlugin implements Listener
                 return true;
             }
 
+            sb.setLength(sb.length()-separator.length());
             String msg = sb.toString();
             if(msg.contains("\n"))
             {
@@ -301,6 +307,39 @@ public class LetMeInPlugin extends JavaPlugin implements Listener
 
             return entry;
         }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onPing(ServerListPingEvent event)
+    {
+        if(!serverListEnabled && !autoJoinSupport)
+            return;
+
+        long time = System.currentTimeMillis();
+        int numPlayers = event.getNumPlayers();
+        synchronized(queue)
+        {
+            for(Entry entry : queue)
+            {
+                if(entry.request.address.equals(event.getAddress()))
+                {
+                    if(autoJoinSupport)
+                    {
+                        if(entry.request.pos <= allow || (time - entry.request.lastLogin) / 2 > timeout)
+                            event.setMaxPlayers(numPlayers + 1);
+                        else if(numPlayers < event.getMaxPlayers())
+                            event.setMaxPlayers(numPlayers);
+                    }
+
+                    if(serverListEnabled)
+                        event.setMotd(message("server-list", entry.request));
+                    return;
+                }
+            }
+        }
+
+        if(autoJoinSupport)
+            event.setMaxPlayers(numPlayers +1);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
