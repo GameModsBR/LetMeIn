@@ -44,26 +44,13 @@ public class LetMeInPlugin extends JavaPlugin implements Listener
 
     private ScheduledExecutorService preciseScheduler = Executors.newSingleThreadScheduledExecutor(new ThreadFactory()
     {
+        private int count;
         @Override
         public Thread newThread(Runnable r)
         {
-            FutureTask<Thread> thread = new FutureTask<Thread>(new Callable<Thread>()
-            {
-                @Override
-                public Thread call() throws Exception
-                {
-                    return Thread.currentThread();
-                }
-            });
-            getServer().getScheduler().runTaskAsynchronously(LetMeInPlugin.this, thread);
-            try
-            {
-                return thread.get(30, TimeUnit.SECONDS);
-            }
-            catch(Exception e)
-            {
-                throw new RuntimeException(e);
-            }
+            Thread thread = new Thread(r, "LetMeIn-" + ++count);
+            thread.setDaemon(true);
+            return thread;
         }
     });
 
