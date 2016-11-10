@@ -22,6 +22,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.*;
 import java.net.InetAddress;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.Level;
@@ -125,7 +126,7 @@ public class LetMeInPlugin extends JavaPlugin implements Listener
         if("letmeinreload".equals(cmd))
         {
             reloadConfig();
-            sender.sendMessage(ChatColor.GREEN+"The LetMeIn messages and configurations have been reloaded");
+            sender.sendMessage(message("cmd.letmeinreload.success", ChatColor.GREEN+"The LetMeIn messages and configurations have been reloaded"));
             return true;
         }
         else if("queueclear".equals(cmd))
@@ -134,7 +135,7 @@ public class LetMeInPlugin extends JavaPlugin implements Listener
             {
                 queue.clear();
             }
-            sender.sendMessage(ChatColor.GREEN+"The join queue have been cleared");
+            sender.sendMessage(message("cmd.queue.clear.success", ChatColor.GREEN+"The join queue have been cleared"));
             return true;
         }
         else if("queuepriority".equals(cmd))
@@ -157,7 +158,7 @@ public class LetMeInPlugin extends JavaPlugin implements Listener
 
             if(entry == null || entry.request == null)
             {
-                sender.sendMessage(ChatColor.RED+name+" is not queued");
+                sender.sendMessage(message("cmd.queue.priority.not-queued", ChatColor.RED+"{0} is not queued", name));
                 return true;
             }
 
@@ -166,10 +167,10 @@ public class LetMeInPlugin extends JavaPlugin implements Listener
             int pos = request.pos;
             request.priority = priority;
             updatePosition(entry);
-            sender.sendMessage(
-                    ChatColor.GREEN+name+"'s priority was changed from "+before+" to "+priority+
-                    " and the position was change from "+pos+" to "+request.pos
-            );
+            sender.sendMessage(message("cmd.queue.priority.success",
+                    ChatColor.GREEN+"{0}'s priority was changed from {1} to {2} and the position was change from {3} to {4}",
+                    name, before, priority, pos, request.pos
+            ));
             return true;
         }
         else if("queueview".equalsIgnoreCase(cmd))
@@ -184,46 +185,76 @@ public class LetMeInPlugin extends JavaPlugin implements Listener
             {
                 @SuppressWarnings("deprecation")
                 OfflinePlayer player = Bukkit.getOfflinePlayer(name);
-                sender.sendMessage(
-                        player.getName()+" "+ChatColor.RED+"is not queued"+ChatColor.RESET+
-                                " but would receive priority "+findPriorityPermission(player)
-                );
+                sender.sendMessage(message("cmd.queue.view.not-queued",
+                        "{0} "+ChatColor.RED+"is not queued"+ChatColor.RESET+" but would receive priority {1}",
+                        player.getName(), findPriorityPermission(player)
+                ));
                 return true;
             }
 
             Request request = entry.request;
-            sender.sendMessage(
-                    request.player.getName()+" "+request.pos+"/"+queue.size()+" Priority:"+request.priority+" "+
-                    "Good:"+request.goodPriority+" Bad:"+request.badPriority+" Kicks:"+request.kicks+" "+
-                    "Last:"+ DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(request.lastLogin)) +" "+
-                    "Login:"+request.login+" UUID:"+request.playerId
-            );
+            Map<String, Object> map = paramMap(request);
+            map.put("last", DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(request.lastLogin)));
+
+            sender.sendMessage(message("cmd.queue.view.success",
+                    "{name} {pos}/{slots} Priority:{priority} Good:{good} Bad:{bad} Kicks:{kicks} Last:{last} Login:{login} UUID:{uuid}",
+                    map
+            ));
+            return true;
         }
         else if("queue".equalsIgnoreCase(cmd))
         {
-            StringBuilder sb = new StringBuilder(ChatColor.GREEN.toString());
+            StringBuilder sb = new StringBuilder();
             int pos = 1;
+            String separator = message("cmd.queue.list.separator", ", ");
+            String pattern = message("cmd.queue.list.pattern", "{prefix}{pos}:{name} ({priority}){suffix}");
+            String headPrefix = message("cmd.queue.list.head.prefix", ChatColor.GREEN.toString());
+            String headSuffix = message("cmd.queue.list.head.suffix", "");
+            String middlePrefix = message("cmd.queue.list.middle.prefix", ChatColor.GOLD.toString());
+            String middleSuffix = message("cmd.queue.list.middle.suffix", "");
+            String underPrefix = message("cmd.queue.list.low-priority.prefix", ChatColor.RED.toString());
+            String underSuffix = message("cmd.queue.list.low-priority.suffix", "");
+
             synchronized(queue)
             {
-                boolean underPriority = false;
+                Map<String, Object> map = new HashMap<String, Object>();
                 for(Entry entry : queue)
                 {
-                    sb.append(pos).append(':').append(entry.request.player.getName()).append(" (").append(entry.request.priority).append(")");
-                    if(pos == allow)
-                        sb.append(ChatColor.WHITE);
-                    else if(entry.request.priority < def && !underPriority)
+                    paramMap(entry.request, map);
+                    if(pos <= allow)
                     {
-                        underPriority = true;
-                        sb.append(ChatColor.RED);
+                        map.put("prefix", headPrefix);
+                        map.put("suffix", headSuffix);
+                    }
+                    else if(entry.request.priority < def)
+                    {
+                        map.put("prefix", underPrefix);
+                        map.put("suffix", underSuffix);
+                    }
+                    else
+                    {
+                        map.put("prefix", middlePrefix);
+                        map.put("suffix", middleSuffix);
                     }
 
-                    sb.append(", ");
+                    sb.append(replaceTokens(pattern, map, false));
+                    sb.append(separator);
                     pos++;
                 }
             }
 
             if(pos == 1)
-                sb.append("Nobody is queued");
+            {
+                sender.sendMessage(message("cmd.queue.list.empty", ChatColor.GREEN+"Nobody is queued"));
+                return true;
+            }
+
+            String msg = sb.toString();
+            if(msg.contains("\n"))
+            {
+                sender.sendMessage(msg.split("\n"));
+                return true;
+            }
 
             sender.sendMessage(sb.toString());
             return true;
@@ -449,6 +480,30 @@ public class LetMeInPlugin extends JavaPlugin implements Listener
         return messages.getString(key, key);
     }
 
+    private String message(String key, String fallback, Map<String, Object> paramMap)
+    {
+        String msg = messages.getString(key, fallback);
+        return replaceTokens(msg, paramMap);
+    }
+
+    private String message(String key, String fallback)
+    {
+        String msg = messages.getString(key, fallback);
+        return ChatColor.translateAlternateColorCodes('&', msg);
+    }
+
+    private String message(String key, String fallback, Object... params)
+    {
+        for(int i = 0; i < params.length; i++)
+        {
+            if(params[i] instanceof String)
+                params[i] = ChatColor.stripColor((String) params[i]);
+        }
+
+        String msg = messages.getString(key, fallback);
+        return MessageFormat.format(ChatColor.translateAlternateColorCodes('&', msg), params);
+    }
+
     private String message(String key, Player player)
     {
         Map<String, Object> rep = new HashMap<String, Object>();
@@ -458,9 +513,15 @@ public class LetMeInPlugin extends JavaPlugin implements Listener
         return replaceTokens(findMessage(key, priority), rep);
     }
 
-    private String message(String key, Request request)
+    private Map<String, Object> paramMap(Request request)
     {
         Map<String, Object> rep = new HashMap<String, Object>();
+        paramMap(request, rep);
+        return rep;
+    }
+
+    private void paramMap(Request request, Map<String, Object> rep)
+    {
         rep.put("name", request.player.getName());
         rep.put("login", request.login);
         rep.put("uuid", request.playerId);
@@ -471,10 +532,20 @@ public class LetMeInPlugin extends JavaPlugin implements Listener
         rep.put("bad", request.badPriority);
         rep.put("timeout", timeout);
         rep.put("kicks", request.kicks);
-        return replaceTokens(findMessage(key, request.priority), rep);
+        rep.put("slots", getServer().getMaxPlayers());
+    }
+
+    private String message(String key, Request request)
+    {
+        return replaceTokens(findMessage(key, request.priority), paramMap(request));
     }
 
     private String replaceTokens(String text, Map<String, Object> replacements)
+    {
+        return replaceTokens(text, replacements, true);
+    }
+
+    private String replaceTokens(String text, Map<String, Object> replacements, boolean stripColors)
     {
         Matcher matcher = pattern.matcher(text);
 
@@ -483,11 +554,14 @@ public class LetMeInPlugin extends JavaPlugin implements Listener
         while (matcher.find())
         {
             Object replacement = replacements.get(matcher.group(1));
+            if(stripColors)
+                replacement = ChatColor.stripColor(String.valueOf(replacement));
+
             builder.append(ChatColor.translateAlternateColorCodes('&', text.substring(i, matcher.start())));
             if (replacement == null)
                 builder.append(matcher.group(0));
             else
-                builder.append(ChatColor.stripColor(String.valueOf(replacement)));
+                builder.append(replacement);
             i = matcher.end();
         }
         builder.append(ChatColor.translateAlternateColorCodes('&', text.substring(i, text.length())));

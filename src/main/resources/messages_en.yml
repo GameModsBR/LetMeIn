@@ -46,3 +46,35 @@ custom:
       Please reconnect within &c&l{timeout} seconds&f to hold your position.
     welcome: |
       &bWelcome {name}, you've joined before &a{good}&f players and &d{kick}&f players have been kicked to open slot for you.
+
+#############################################################
+###        Messages displayed on admin commands.          ###
+#############################################################
+
+# These messages are not shown to normal users
+cmd:
+  letmeinreload:
+    success: '&aThe LetMeIn messages and configurations have been reloaded'
+  queue:
+    clear:
+      success: '&aThe join queue have been cleared'
+    priority:
+      not-queued: '&c{0} is not queued'
+      success: "&a{0}'s priority was changed from {1} to {2} and the position was change from {3} to {4}"
+    view:
+      not-queued: '{0} &cis not queued&r but would receive priority {1}'
+      success: '{name} {pos}/{size} Priority:{priority} Good:{good} Bad:{bad} Kicks:{kicks} Last:{last} Login:{login} UUID:{uuid}'
+    list:
+      empty: '&aNobody is queued'
+      # Can be a line break
+      separator: ", "
+      pattern: '{prefix}{pos}:{name} ({priority}){suffix}'
+      head: # When a player is about to join
+        prefix: '&a'
+        suffix: ''
+      middle: # When a player is waiting on the queue
+        prefix: '&6'
+        suffix: ''
+      low-priority: # When a player has priorioty bellow the default value
+        prefix: '&c'
+        suffix: ''
