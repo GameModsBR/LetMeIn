@@ -39,6 +39,7 @@ public class LetMeInPlugin extends JavaPlugin implements Listener
     private int def;
     private int allow;
     private boolean uuidMethod;
+    private boolean welcomeOnlyWhenQueued;
     private int timeout;
     private ScheduledFuture<?> cleanupTask;
 
@@ -96,6 +97,7 @@ public class LetMeInPlugin extends JavaPlugin implements Listener
         allow = Math.min(Math.max(1, getConfig().getInt("allow-to-join-post", 5)), Integer.MAX_VALUE);
         uuidMethod = getConfig().getString("get-player-by", "uuid").equalsIgnoreCase("uuid");
         timeout = Math.max(1, getConfig().getInt("timeout", 30));
+        welcomeOnlyWhenQueued = getConfig().getBoolean("welcome-only-when-queued", true);
 
         if(cleanupTask != null)
             cleanupTask.cancel(true);
@@ -180,6 +182,7 @@ public class LetMeInPlugin extends JavaPlugin implements Listener
 
             if(entry == null || entry.request == null)
             {
+                @SuppressWarnings("deprecation")
                 OfflinePlayer player = Bukkit.getOfflinePlayer(name);
                 sender.sendMessage(
                         player.getName()+" "+ChatColor.RED+"is not queued"+ChatColor.RESET+
@@ -380,13 +383,31 @@ public class LetMeInPlugin extends JavaPlugin implements Listener
         Player player = event.getPlayer();
         if(player.isOnline())
         {
+            Entry entry = null;
+            UUID uniqueId = player.getUniqueId();
             synchronized(queue)
             {
-                queue.remove(new Entry(player.getUniqueId()));
+                Iterator<Entry> iterator = queue.iterator();
+                while(iterator.hasNext())
+                {
+                    Entry search = iterator.next();
+                    if(uuidMethod)
+                    {
+                        if(search.request.playerId.equals(uniqueId))
+                        {
+                            entry = search;
+                            iterator.remove();
+                            break;
+                        }
+                    }
+                }
             }
 
-            if(!permission.playerHas(null, "letmein.protected"))
+            if(!permission.playerHas(player, "letmein.protected"))
                 kickQueue.add(event.getPlayer());
+
+            if(entry != null && entry.request.shouldWelcome())
+                player.sendMessage(message("welcome", entry.request));
         }
     }
 
@@ -663,6 +684,11 @@ public class LetMeInPlugin extends JavaPlugin implements Listener
         public int hashCode()
         {
             return playerId.hashCode();
+        }
+
+        private boolean shouldWelcome()
+        {
+            return !welcomeOnlyWhenQueued || badPriority != 0 || goodPriority != 0 || kicks != 0;
         }
     }
 }

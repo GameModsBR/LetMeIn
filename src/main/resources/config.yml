@@ -40,3 +40,7 @@ timeout: 30
 # The nick method might work better on online:false
 # [Default: uuid] [Options: uuid, nick]
 get-player-by: uuid
+
+# When this is true, the welcome message will be sent only if the the player's connection were queued
+# or if somebody got kicked for him
+welcome-only-when-queued: true
