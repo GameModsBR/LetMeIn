@@ -1,0 +1,85 @@
+#############################################################
+### Messages displayed to players with no custom message. ###
+#############################################################
+
+# Displayed when a player is kicked while in a queue when the server is full
+queued: |
+  &eOlá {name}, &fo servidor está cheio agora e &evocê entrou na fila&f.
+  &2Sua posição é &l{pos}&f, &c{bad}&f doadores passaram você.
+
+  Por favor reconecte em menos de &c&l{timeout} segundos&f para manter sua posição.
+  &eSeja um doador para entrar mais rápido passando a frente de que não é doador.
+
+# Displayed when a player is kicked to open slot for an other player
+kicked: |
+  &cDesculpe {name}, tivemos que desconectar você porque o servidor está cheio e
+  um doador queria entrar, seja um doador e evite situações como esta.
+
+# Displayed when a player joins the server, can display information about the queue,
+# for example how many players bypassed him, how many players he has bypassed and
+# how many players have been kicked to allow him to connect
+welcome: |
+  &bBem-Vindo {name}&f, &c{bad}&f jogadores entraram antes de você, seja um doador também e você irá entrar mais rápido quando o servidor estiver cheio.
+
+server-list: |
+  &Olá {name}, &2Sua posição é &l{pos}
+  &cPor favor reconecte para manter sua posição.
+
+#############################################################
+###  Messages displayed to players with custom message.   ###
+#############################################################
+
+# Let's say a player has priority 3, we will try to find a custom message for priority 3, 2, 1, in that order,
+# You don't need to define all message keys
+custom:
+  1:
+    queued: |
+      &eOlá {name}, &fo servidor está cheio agora e &evocê entrou na fila &lcom prioridade {priority}&f.
+      &2Sua posição é &l{pos}&f, você passou &a{good}&f jogadores e &c{bad}&f doadores mais elevados passaram você.
+
+      Por favor reconecte em menos de &c&l{timeout} segundos&f para manter sua posição.
+      &eSeja um doador mais elevado para entrar ainda mais rápido passando a frente de doadores normais.
+
+    welcome: |
+      &bBem-Vindo {name}&f, você entrou antes de &a{good}&f jogadores e &c{bad}&f jogadores entraram antes de você, seja um doador mais elevado e você irá entrar ainda mais rápido quando o servidor estiver cheio.
+
+  2:
+    queued: |
+      &eOlá {name}, &fO servidor está cheio agora e &evocê entrou na fila &lcom prioridade {priority}&f.
+      &2Sua posição é &l{pos}&f, você passou {good} jogadores.
+
+      Por favor reconecte em menos de &c&l{timeout} segundos&f para manter sua posição.
+    welcome: |
+      &bBem-Vindo {name}, você entrou antes de &a{good}&f jogadores e &d{kick}&f jogadores foram desconectados para abrir vaga para você.
+
+#############################################################
+###        Messages displayed on admin commands.          ###
+#############################################################
+
+# These messages are not shown to normal users
+cmd:
+  letmeinreload:
+    success: '&aAs mensagens e configurações do LetMeIn foram recarregadas'
+  queue:
+    clear:
+      success: '&aA fila de entrada foi zerada'
+    priority:
+      not-queued: '&c{0} não está na fila'
+      success: "&aA prioridade de {0} foi alterada de {1} para {2} e a posição mudou de {3} para {4}"
+    view:
+      not-queued: '{0} &cnão está na fila&r mas receberia a prioridade {1}'
+      success: '{name} {pos}/{size} Prioridade:{priority} Passou:{good} Passado:{bad} Desconectou:{kicks} Visto:{last} Login:{login} UUID:{uuid}'
+    list:
+      empty: '&aNinguém está na fila'
+      # Can be a line break
+      separator: ", "
+      pattern: '{prefix}{pos}:{name} ({priority}){suffix}'
+      head: # When a player is about to join
+        prefix: '&a'
+        suffix: ''
+      middle: # When a player is waiting on the queue
+        prefix: '&6'
+        suffix: ''
+      low-priority: # When a player has priorioty bellow the default value
+        prefix: '&c'
+        suffix: ''

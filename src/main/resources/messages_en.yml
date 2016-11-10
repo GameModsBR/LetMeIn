@@ -39,6 +39,7 @@ custom:
 
       Please reconnect within &c&l{timeout} seconds&f to hold your position.
       &eBecome a higher donor to join even faster bypassing normal donors.
+
     welcome: |
       &bWelcome {name}&f, you've joined before &a{good}&f players and &c{bad}&f players have joined before you, become a higher donor and you'll join quicker when the server is full.
 
