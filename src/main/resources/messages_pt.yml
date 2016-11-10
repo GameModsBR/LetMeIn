@@ -7,7 +7,7 @@ queued: |
   &eOlá {name}, &fo servidor está cheio agora e &evocê entrou na fila&f.
   &2Sua posição é &l{pos}&f, &c{bad}&f doadores passaram você.
 
-  Por favor reconecte em menos de &c&l{timeout} segundos&f para manter sua posição.
+  Por favor reconecte em até &c&l{timeout} segundos&f para manter sua posição.
   &eSeja um doador para entrar mais rápido passando a frente de que não é doador.
 
 # Displayed when a player is kicked to open slot for an other player
@@ -37,7 +37,7 @@ custom:
       &eOlá {name}, &fo servidor está cheio agora e &evocê entrou na fila &lcom prioridade {priority}&f.
       &2Sua posição é &l{pos}&f, você passou &a{good}&f jogadores e &c{bad}&f doadores mais elevados passaram você.
 
-      Por favor reconecte em menos de &c&l{timeout} segundos&f para manter sua posição.
+      Por favor reconecte em até &c&l{timeout} segundos&f para manter sua posição.
       &eSeja um doador mais elevado para entrar ainda mais rápido passando a frente de doadores normais.
 
     welcome: |
@@ -48,7 +48,7 @@ custom:
       &eOlá {name}, &fO servidor está cheio agora e &evocê entrou na fila &lcom prioridade {priority}&f.
       &2Sua posição é &l{pos}&f, você passou {good} jogadores.
 
-      Por favor reconecte em menos de &c&l{timeout} segundos&f para manter sua posição.
+      Por favor reconecte em até &c&l{timeout} segundos&f para manter sua posição.
     welcome: |
       &bBem-Vindo {name}, você entrou antes de &a{good}&f jogadores e &d{kick}&f jogadores foram desconectados para abrir vaga para você.
 
