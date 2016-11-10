@@ -1,0 +1,35 @@
+name: LetMeIn
+author: joserobjr
+version: 1.0-SNAPSHOT
+
+main: br.com.gamemods.queue.LetMeInPlugin
+depend: [Vault]
+
+## Please note that Bukkit's SuperPerms is not supported, the permissions bellow are merely informative
+permissions:
+
+  letmein.disabled:
+    description: |
+      LetMeIn will ignore player connections when the player has this permission, the connection will be processed as if LetMeIn wasn't there.
+      The player may still be kicked by an other player with letmein.kick permission,
+      so you still need to give letmein.protected if you want to completely disable this plugin for him
+
+  letmein.protected:
+    description: A player with this permission will never be kicked to allow an other player to join
+
+  letmein.kick:
+    description: |
+      When a player with this permission is near the head of the queue (value defined in allow-to-join-post config)
+      a player without letmein.protected permission may be kicked to allow this player join quicker.
+      The player is NOT randomly choosen, players without letmein.protected enters in a kick queue when they join the server
+      this grants that only the longest sessions will be kicked. You can also define timed protection after the player join
+      in the configs.
+
+  letmein.staff:
+    description: Allow a player to join when the server is full, skiping the queue and ignoring the server limits
+
+  letmein.priority.1: # The number can be increased to give higher priority
+    description: |
+      By default the players have priority zero, if you assign a higher permission then the player will be
+      able to skip players with lower priority in the queue. Increase the number to give higher permissions.
+      The number must be between 1 and the max priority defined in the config, both numbers are inclusive.

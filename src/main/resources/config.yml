@@ -1,0 +1,42 @@
+# PLEASE NOTE: This plugins requires Vault and a Vault compatible plugin that can check permissions when a player is offline!
+# Bukkit's superperms is NOT supported because it requires the player to be online.
+#
+# The maximum priority value that is scanned when a player is added to the join queue
+# Higher values allows you to set higher priority levels but will increase the numer of calls to the permission plugin
+# The default value allows you to set the following permissions:
+#   letmein.priority.3
+#   letmein.priority.2
+#   letmein.priority.1
+#
+# If a player has multiple priority permissions then the highest one
+# will be used as long as it's equals or below the max value bellow
+# [Default: 3] [Recommended: 1 ~ 10] [Min: 1] [Max: 2147483646]
+max-priority: 3
+
+# The priority value that is given to a player who does not have any priority permission
+# Increase this if you need to assign negative priority to specifc players.
+# This value can be higher than max-priority
+# [Default: 0] [Recommended: 0 ~ 10] [Min: 0] [Max: 2147483646]
+default-priority: 0
+
+# Players will be able to join when they reach this position
+# This will allow the queue to run faster.
+# [Default: 5] [Recommended: 2 ~ 5] [Min: 1] [Max: 2147483647]
+allow-to-join-post: 5
+
+# The message file will be created after this config file is loaded
+language: en
+
+# If the player does not reconnect after this amount of time, the player will be removed from the queue
+# The clients should have an auto join mod
+# [Unit: Seconds] [Default: 30] [Min: 1] [Max: 2147483647]
+timeout: 30
+
+# We will be getting permissions from earlier states of the connection, the player will not be authenticated yet
+# so UUIDs might be incorrect, specially if a cracked player attempts to join, so how should we get the UUID?
+# Should we trust the UUID privided in the AsyncPlayerPreLogin event or should we get it by the login name?
+# Please note that cracked players can type any username as they which, including invalid ones, so both them are unsafe.
+# The UUID method works better on online:true servers, if a cracked player join the queue he will fail to authenticate later
+# The nick method might work better on online:false
+# [Default: uuid] [Options: uuid, nick]
+get-player-by: uuid

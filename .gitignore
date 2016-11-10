@@ -1,0 +1,6 @@
+.gradle
+.idea
+*.ipr
+/build
+/test
+/run

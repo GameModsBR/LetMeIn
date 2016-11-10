@@ -1,0 +1,48 @@
+#############################################################
+### Messages displayed to players with no custom message. ###
+#############################################################
+
+# Displayed when a player is kicked while in a queue when the server is full
+queued: |
+  &eHello {name}, &fthe server is full now and &eyou are now queued&f.
+  &2Your position is &l{pos}&f, &c{bad}&f donors have bypassed you.
+
+  Please reconnect within &c&l{timeout} seconds&f to hold your position.
+  &eBecome a donor to join faster bypassing who is not a donor.
+
+# Displayed when a player is kicked to open slot for an other player
+kicked: |
+  &cSorry {name}, we had to disconnect you because the server is full and
+  a donor wanted to join, become a donor to avoid this situation.
+
+# Displayed when a player joins the server, can display information about the queue,
+# for example how many players bypassed him, how many players he has bypassed and
+# how many players have been kicked to allow him to connect
+welcome: |
+  &bWelcome {name}&f, &c{bad}&f players have joined before you, become a donor too and you'll join quicker when the server is full.
+
+#############################################################
+###  Messages displayed to players with custom message.   ###
+#############################################################
+
+# Let's say a player has priority 3, we will try to find a custom message for priority 3, 2, 1, in that order,
+# You don't need to define all message keys
+custom:
+  1:
+    queued: |
+      &eHello {name}, &fthe server is full now and &eyou are now queued &lwith priority {priority}&f.
+      &2Your position is &l{pos}&f, you've bypassed &a{good}&f players and &c{bad}&f higher donors have bypassed you.
+
+      Please reconnect within &c&l{timeout} seconds&f to hold your position.
+      &eBecome a higher donor to join even faster bypassing normal donors.
+    welcome: |
+      &bWelcome {name}&f, you've joined before &a{good}&f players and &c{bad}&f players have joined before you, become a higher donor and you'll join quicker when the server is full.
+
+  2:
+    queued: |
+      &eHello {name}, &fthe server is full now and &eyou are now queued &lwith priority {priority}&f.
+      &2Your position is &l{pos}&f, you've bypassed {good} players.
+
+      Please reconnect within &c&l{timeout} seconds&f to hold your position.
+    welcome: |
+      &bWelcome {name}, you've joined before &a{good}&f players and &d{kick}&f players have been kicked to open slot for you.
