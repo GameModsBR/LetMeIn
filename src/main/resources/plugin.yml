@@ -1,12 +1,38 @@
 name: LetMeIn
 author: joserobjr
-version: 1.0-SNAPSHOT
+version: ${version}
 
 main: br.com.gamemods.queue.LetMeInPlugin
 depend: [Vault]
 
-## Please note that Bukkit's SuperPerms is not supported, the permissions bellow are merely informative
+commands:
+
+  queueclear:
+    description: Clear the entire join queue
+    permission: letmein.cmd.queue.clear
+    aliases: [clearqueue]
+
+  queuepriority:
+    description: Temporarely changes the queue priority of a player.
+    permission: letmein.cmd.queue.priority
+    usage: /<command> player priority
+
+  queueview:
+    description: View information about a queued player
+    permission: letmein.cmd.queue.view
+    usage: /<command> player
+
+  queue:
+    description: List the queued players
+    permission: letmein.cmd.queue.list
+
+  letmeinreload:
+    description: Reloads the messages and configurations
+    permission: letmein.cmd.reload
+
 permissions:
+
+  ## Please note that Bukkit's SuperPerms is not supported, the permissions definitions bellow are merely informative
 
   letmein.disabled:
     description: |
@@ -33,3 +59,30 @@ permissions:
       By default the players have priority zero, if you assign a higher permission then the player will be
       able to skip players with lower priority in the queue. Increase the number to give higher permissions.
       The number must be between 1 and the max priority defined in the config, both numbers are inclusive.
+
+
+  # Command permissions
+
+  letmein.cmd.*:
+    description: Allows to manage the queue and reload the configs
+    children:
+      letmein.cmd.queue.clear: true
+      letmein.cmd.queue.priority: true
+      letmein.cmd.queue.view: true
+      letmein.cmd.queue.list: true
+      letmein.cmd.reload: true
+
+  letmein.cmd.queue.clear:
+    description: Allows to use /queueclear
+
+  letmein.cmd.queue.priority:
+    description: Allows to use /queuepriority
+
+  letmein.cmd.queue.view:
+    description: Allows to use /queueview
+
+  letmein.cmd.queue.list:
+    description: Allows to use /queue
+
+  letmein.cmd.reload:
+    description: Allows to use /letmeinreload

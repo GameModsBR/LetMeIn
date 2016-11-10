@@ -5,6 +5,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -19,6 +21,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
 import java.net.InetAddress;
+import java.text.DateFormat;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.Level;
@@ -124,6 +127,135 @@ public class LetMeInPlugin extends JavaPlugin implements Listener
                 }
             }
         }, timeout, timeout, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
+    {
+        String cmd = command.getName();
+        if("letmeinreload".equals(cmd))
+        {
+            reloadConfig();
+            sender.sendMessage(ChatColor.GREEN+"The LetMeIn messages and configurations have been reloaded");
+            return true;
+        }
+        else if("queueclear".equals(cmd))
+        {
+            synchronized(queue)
+            {
+                queue.clear();
+            }
+            sender.sendMessage(ChatColor.GREEN+"The join queue have been cleared");
+            return true;
+        }
+        else if("queuepriority".equals(cmd))
+        {
+            if(args.length != 2)
+                return false;
+
+            int priority;
+            try
+            {
+                priority = Integer.parseInt(args[1]);
+            }
+            catch(NumberFormatException ignored)
+            {
+                return false;
+            }
+
+            String name = args[0];
+            Entry entry = findRequest(name);
+
+            if(entry == null || entry.request == null)
+            {
+                sender.sendMessage(ChatColor.RED+name+" is not queued");
+                return true;
+            }
+
+            Request request = entry.request;
+            int before = request.priority;
+            int pos = request.pos;
+            request.priority = priority;
+            updatePosition(entry);
+            sender.sendMessage(
+                    ChatColor.GREEN+name+"'s priority was changed from "+before+" to "+priority+
+                    " and the position was change from "+pos+" to "+request.pos
+            );
+            return true;
+        }
+        else if("queueview".equalsIgnoreCase(cmd))
+        {
+            if(args.length != 1)
+                return false;
+
+            String name = args[0];
+            Entry entry = findRequest(name);
+
+            if(entry == null || entry.request == null)
+            {
+                OfflinePlayer player = Bukkit.getOfflinePlayer(name);
+                sender.sendMessage(
+                        player.getName()+" "+ChatColor.RED+"is not queued"+ChatColor.RESET+
+                                " but would receive priority "+findPriorityPermission(player)
+                );
+                return true;
+            }
+
+            Request request = entry.request;
+            sender.sendMessage(
+                    request.player.getName()+" "+request.pos+"/"+queue.size()+" Priority:"+request.priority+" "+
+                    "Good:"+request.goodPriority+" Bad:"+request.badPriority+" Kicks:"+request.kicks+" "+
+                    "Last:"+ DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(request.lastLogin)) +" "+
+                    "Login:"+request.login+" UUID:"+request.playerId
+            );
+        }
+        else if("queue".equalsIgnoreCase(cmd))
+        {
+            StringBuilder sb = new StringBuilder(ChatColor.GREEN.toString());
+            int pos = 1;
+            synchronized(queue)
+            {
+                boolean underPriority = false;
+                for(Entry entry : queue)
+                {
+                    sb.append(pos).append(':').append(entry.request.player.getName()).append(" (").append(entry.request.priority).append(")");
+                    if(pos == allow)
+                        sb.append(ChatColor.WHITE);
+                    else if(entry.request.priority < def && !underPriority)
+                    {
+                        underPriority = true;
+                        sb.append(ChatColor.RED);
+                    }
+
+                    sb.append(", ");
+                    pos++;
+                }
+            }
+
+            if(pos == 1)
+                sb.append("Nobody is queued");
+
+            sender.sendMessage(sb.toString());
+            return true;
+        }
+
+        return false;
+    }
+
+    private Entry findRequest(String playerName)
+    {
+        synchronized(queue)
+        {
+            for(Entry entry : queue)
+            {
+                if(entry.request.player.getName().equalsIgnoreCase(playerName) || entry.request.login.equalsIgnoreCase(playerName))
+                {
+                    return entry;
+                }
+            }
+        }
+
+        return null;
     }
 
     private Entry updatePosition(Entry entry)
